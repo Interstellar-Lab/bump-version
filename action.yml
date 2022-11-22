@@ -5,6 +5,10 @@ inputs:
     description: 'Path to the version file'
     required: true
     default: '.VERSION'
+  check-only:
+    description: 'If true, will only check if version in version-file is valid (default: false)'
+    required: false
+    default: 'false'
 outputs:
   last-version:
     description: 'Last version tag published'
@@ -48,4 +52,16 @@ runs:
           echo "${{ env.new-version }} <= ${{ env.last-version }}: version not new"
           echo "::error::no new version"
           exit 1
+        shell: bash
+      - name: Tag new version
+        if: ! ${{ inputs.check-only }}
+        run: |
+          echo "latest version is: v${{ env.last-version }}"
+          echo "new version is:    v${{ env.new-version }}"
+          echo "publishing new tag..."
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git tag -a v${{ env.new-version }} -m "Realse version ${{ env.new-version }}"
+          git push origin v${{ env.new-version }}
+          echo "::notice:: new tag published: 'v${{ env.new-version }}'"
         shell: bash
