@@ -8,7 +8,7 @@ inputs:
   check-only:
     description: 'If true, will only check if version in version-file is valid (default: false)'
     required: false
-    default: 'false'
+    default: false
 outputs:
   last-version:
     description: 'Last version tag published'
