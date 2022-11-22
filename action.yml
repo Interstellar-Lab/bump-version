@@ -1,0 +1,51 @@
+name: 'Check Version'
+description: 'Check version number in version file versus latest published version tag'
+inputs:
+  version-file:
+    description: 'Path to the version file'
+    required: true
+    default: '.VERSION'
+outputs:
+  last-version:
+    description: 'Last version tag published'
+    value: ${{ steps.step1.outputs.last-version }}
+  new-version:
+    description: 'New version contained in the version file'
+    value: ${{ steps.step2.outputs.new-version }}
+runs:
+  using: "composite"
+  steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+      - name: Get last version
+        id: step1
+        run: |
+          echo "last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)" >> $GITHUB_ENV
+          echo "last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)" >> $GITHUB_OUTPUT
+          echo "::notice::last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)"
+        shell: bash
+      - name: Get new version
+        id: step2
+        run: |
+          echo "new-version=$(cat ${{inputs.version-file}})" >> $GITHUB_ENV
+          echo "new-version=$(cat ${{inputs.version-file}})" >> $GITHUB_OUTPUT
+          echo "::notice::new-version=$(cat ${{inputs.version-file}})"
+        shell: bash
+      - name: Check version file is valid
+        run: |
+          if ! [[ ${{ env.new-version }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then \
+            echo "::error::'${{ env.new-version }}' is not a valid version format" && \
+            exit 1; \
+          fi
+        shell: bash
+      - name: Error if version is not new
+        if: ${{ env.new-version <= env.last-version }}
+        run: |
+          echo "last version is: v${{ env.last-version }}"
+          echo "new version is:    v${{ env.new-version }}"
+          echo "${{ env.new-version }} <= ${{ env.last-version }}: version not new"
+          echo "::error::no new version"
+          exit 1
+        shell: bash
