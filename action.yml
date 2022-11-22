@@ -54,7 +54,7 @@ runs:
           exit 1
         shell: bash
       - name: Tag new version
-        if: ! ${{ inputs.check-only }}
+        if: ${{ ! ${{ inputs.check-only }} }}
         run: |
           echo "latest version is: v${{ env.last-version }}"
           echo "new version is:    v${{ env.new-version }}"
