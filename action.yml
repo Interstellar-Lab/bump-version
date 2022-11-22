@@ -39,9 +39,9 @@ runs:
         shell: bash
       - name: Check version file is valid
         run: |
-          if ! [[ ${{ env.new-version }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then \
-            echo "::error::'${{ env.new-version }}' is not a valid version format" && \
-            exit 1; \
+          if ! [[ ${{ env.new-version }} =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'${{ env.new-version }}' is not a valid version format"
+            exit 1
           fi
         shell: bash
       - name: Error if version is not new
