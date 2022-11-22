@@ -54,8 +54,11 @@ runs:
           exit 1
         shell: bash
       - name: Tag new version
-        if: ${{ ! inputs.check-only }}
         run: |
+          if ! [[ inputs.check-only ]]; then
+            echo "::notice:: no new tag because check only"
+            exit 1
+          fi
           echo "latest version is: v${{ env.last-version }}"
           echo "new version is:    v${{ env.new-version }}"
           echo "publishing new tag..."
