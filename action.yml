@@ -68,8 +68,8 @@ runs:
             IS_NEW=false
           fi
           if ! $IS_NEW; then
-            echo "last version is:\tv${{ env.last-version }}"
-            echo "new version is:\t\tv${{ env.new-version }}"
+            echo "last version is:    v${{ env.last-version }}"
+            echo "new version is:     v${{ env.new-version }}"
             echo "${{ env.new-version }} <= ${{ env.last-version }}: version not new"
             echo "::error::no new version"
             exit 1
