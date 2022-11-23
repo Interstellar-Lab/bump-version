@@ -23,6 +23,13 @@ runs:
         uses: actions/checkout@v2
         with:
           fetch-depth: '0'
+      - name: Check input
+        run: |
+          if [[ (${{ inputs.check-only }} != "yes") && (${{ inputs.check-only }} != "no") ]]; then
+            echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
+            exit 1
+          fi
+        shell: bash
       - name: Get last version
         id: step1
         run: |
@@ -44,21 +51,29 @@ runs:
             exit 1
           fi
         shell: bash
-      - name: Check input
+      - name: Error if version is not new
         run: |
-          if [[ (${{ inputs.check-only }} != "yes") && (${{ inputs.check-only }} != "no") ]]; then
-            echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
+          MAJOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f1)
+          MINOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f2)
+          PATCH_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f3)
+          MAJOR_NEW=$(echo ${{ env.new-version }} | cut -d '.' -f1)
+          MINOR_NEW=$(echo ${{ env.new-version }} | cut -d '.' -f2)
+          PATCH_NEW=$(echo ${{ env.new-version }} | cut -d '.' -f3)
+          IS_NEW=true
+          if [[ $MAJOR_NEW -lt $MAJOR_LAST ]]; then
+            IS_NEW=false
+          elif [[ $MAJOR_NEW -eq $MAJOR_LAST ]] && [[ $MINOR_NEW -lt $MINOR_LAST ]]; then
+            IS_NEW=false
+          elif [[ $MAJOR_NEW -eq $MAJOR_LAST ]] && [[ $MINOR_NEW -eq $MINOR_LAST ]] && [[ $PATCH_NEW -le $PATCH_LAST ]]; then
+            IS_NEW=false
+          fi
+          if ! $IS_NEW; then
+            echo "last version is:\tv${{ env.last-version }}"
+            echo "new version is:\t\tv${{ env.new-version }}"
+            echo "${{ env.new-version }} <= ${{ env.last-version }}: version not new"
+            echo "::error::no new version"
             exit 1
           fi
-        shell: bash
-      - name: Error if version is not new
-        if: ${{ env.new-version <= env.last-version }}
-        run: |
-          echo "last version is: v${{ env.last-version }}"
-          echo "new version is:    v${{ env.new-version }}"
-          echo "${{ env.new-version }} <= ${{ env.last-version }}: version not new"
-          echo "::error::no new version"
-          exit 1
         shell: bash
       - name: Tag new version
         if: ${{ inputs.check-only == 'no' }}
