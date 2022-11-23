@@ -54,7 +54,7 @@ runs:
           exit 1
         shell: bash
       - name: Tag new version
-        if: ${{ inputs.check-only == no }}
+        if: ${{ inputs.check-only == 'no' }}
         run: |
           if ! [[ ${{ inputs.check-only }} != "yes" ]]; then
             echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
