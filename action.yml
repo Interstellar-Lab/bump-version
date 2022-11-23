@@ -6,7 +6,7 @@ inputs:
     required: true
     default: '.VERSION'
   check-only:
-    description: 'If "yes", will only check if version in version-file is valid; otherwise will also push a new tag (default: "no")'
+    description: 'If "yes", will only check if version in version-file is valid; if "no" will also push a new tag (default: "no")'
     required: false
     default: 'no'
 outputs:
@@ -54,8 +54,12 @@ runs:
           exit 1
         shell: bash
       - name: Tag new version
-        if: ${{ inputs.check-only != "yes" }}
+        if: ${{ inputs.check-only == "no" }}
         run: |
+          if ! [[ ${{ inputs.check-only }} != "yes" ]]; then
+            echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
+            exit 1
+          fi
           echo "latest version is: v${{ env.last-version }}"
           echo "new version is:    v${{ env.new-version }}"
           echo "publishing new tag..."
