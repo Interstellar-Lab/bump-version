@@ -1,41 +1,64 @@
-# check-version
-This github action will check that the version number contained in the version file is greater than the latest tag version number. Version should be semVer format. 
-It can be used in your development workflow to automatically tag version number.  
-## Development workflow
-- You do some work
-- When ready to do a PR, you edit the version file in your repository (typically `.VERSION`) according to the changes you made (major, minor or patch)
-- Push and create a PR
-- The CI will check the version file and if the version is in the good format and greater than the previous version, it will create a tag with the new version and publish it
+# bump-version
+This github action create new tag based on the version number contain in the version file.  
+New tag is created only if:
+- Version contained in the version file is in the [SemVer](https://semver.org/) format
+- Version in the version file is higher than the last version in git tag
+
+Additionally, this action can be used to only check the version value in the version file and not publish the tag by 
+setting the input parameter `check-only` to `yes`
 
 ## Inputs:
 - `version-file`: path the version file. Default is `.VERSION`
+- `check-only`: if `yes` the action will only validate that the version is SemVer and higher than the previous tag
+and will not publish the new tag (useful to do a version check in your workflow)
 
 ## Outputs:
 - `new-version`: version contained in the version file
 - `last-version`: last version found in the git tag from the repository
 
-## How to use
-You can use this action to automatically tag your repository based on the version number written in the version file:
+## Development workflow
+- You do some work
+- When ready to do a PR, you edit the version file in your repository (typically `.VERSION`) according to
+  the changes you made (major, minor or patch)
+- Push and create a PR
+- Use `bump-version` action with `check-only` to `yes` to check that the version file has been well updated and is
+  ready to be merged
+- Validate the PR and merge
+- Use `bump-version` action to publish a new tag based on the version contained in the version file
+
+## Example
+Check version on PR on `dev` branch:
 ```yaml
-bump-version:
+name: Check Version
+on:
+  pull_request:
+    branches: [dev]
+jobs:
+  check-version:
     runs-on: ubuntu-latest
-    name: Check version number and bump if version is new
-    outputs:
-      last-version: ${{ steps.check.outputs.last-version }}
-      new-version: ${{ steps.check.outputs.test }}
     steps:
       - uses: actions/checkout@v3
       - id: check
-        name: Check Version
-        uses: Interstellar-Lab/check-version@v0.3
+        name: Bump Version
+        uses: Interstellar-Lab/bump-version@v0.9
         with:
           version-file: '.VERSION'
-      - name: Tag new version
-        if: ${{ steps.check.outputs.new-version > steps.check.outputs.last-version }}
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "<>"
-          git tag -a v${{ steps.check.outputs.new-version }} -m "Realse version ${{ steps.check.outputs.new-version }}"
-          git push origin v${{ steps.check.outputs.new-version }}
-          echo "::notice:: new tag published: 'v${{ steps.check.outputs.new-version }}'"
+          check-only: 'yes'
+```
+Publish new tag on merge in `dev` branch:
+```yaml
+name: Bump Version
+on:
+  push:
+    branches: [dev]
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: check
+        name: Bump Version
+        uses: Interstellar-Lab/bump-version@v0.9
+        with:
+          version-file: '.VERSION'
 ```
