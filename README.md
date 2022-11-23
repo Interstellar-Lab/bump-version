@@ -2,17 +2,17 @@
 This github action create new tag based on the version number contain in the version file.  
 New tag is created only if:
 - Version contained in the version file is in the [SemVer](https://semver.org/) format
-- Version in the version file is higher than the last version in git tag
+- Version in the version file is higher than the last version published in a git tag
 
 Additionally, this action can be used to only check the version value in the version file and not publish the tag by 
 setting the input parameter `check-only` to `yes`
 
-## Inputs:
-- `version-file`: path the version file. Default is `.VERSION`
-- `check-only`: if `yes` the action will only validate that the version is SemVer and higher than the previous tag
-and will not publish the new tag (useful to do a version check in your workflow)
+## Inputs
+- `version-file`: path to the version file. Default is `.VERSION`
+- `check-only`: if `yes` the action will only validate that the version is a SemVer format 
+and higher than the previous tag and will not publish the new tag (useful to do a version check in your workflow)
 
-## Outputs:
+## Outputs
 - `new-version`: version contained in the version file
 - `last-version`: last version found in the git tag from the repository
 
