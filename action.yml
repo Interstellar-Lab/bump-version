@@ -44,6 +44,13 @@ runs:
             exit 1
           fi
         shell: bash
+      - name: Check input
+        run: |
+          if [[ (${{ inputs.check-only }} != "yes") && (${{ inputs.check-only }} != "no") ]]; then
+            echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
+            exit 1
+          fi
+        shell: bash
       - name: Error if version is not new
         if: ${{ env.new-version <= env.last-version }}
         run: |
