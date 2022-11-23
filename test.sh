@@ -1,8 +1,8 @@
-TEST='false'
+check_only=''
 
-if ! [[ $TEST ]]
+if [[ $check_only = "yes" ]]
 then
-    echo oui
-else
-    echo non
+    echo "stop"
+    exit 1
 fi
+echo doing
