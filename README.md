@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - id: check
-        name: Bump Version
+        name: Check Version
         uses: Interstellar-Lab/bump-version@v0.9
         with:
           version-file: '.VERSION'
@@ -52,7 +52,7 @@ on:
   push:
     branches: [dev]
 jobs:
-  check-version:
+  bump-version:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
