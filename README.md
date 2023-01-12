@@ -11,6 +11,8 @@ setting the input parameter `check-only` to `yes`
 - `version-file`: path to the version file. Default is `.VERSION`
 - `check-only`: if `yes` no new tag will be published. The action will only validate that 
 the version is a valid SemVer format and it's a higher version than the last version published in a tag.
+- `read-only`: if `yes` the action will simply read the version-file and
+return successfully
 
 ## Outputs
 - `new-version`: version contained in the version file
