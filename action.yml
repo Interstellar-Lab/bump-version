@@ -63,7 +63,7 @@ runs:
           fi
         shell: bash
       - name: Error if version is not new
-        if: ${{ inputs.read-only }} == "no"
+        if: ${{ inputs.read-only == 'no' }}
         run: |
           MAJOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f1)
           MINOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f2)
@@ -88,7 +88,7 @@ runs:
           fi
         shell: bash
       - name: Tag new version
-        if: ${{ inputs.check-only == 'no' }} && ${{ inputs.read-only }} == "no"
+        if: ${{ inputs.check-only == 'no' && inputs.read-only == 'no' }}
         run: |
           if ! [[ ${{ inputs.check-only }} != "yes" ]]; then
             echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
