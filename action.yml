@@ -56,7 +56,6 @@ runs:
           echo "::notice::new-version=$(cat ${{inputs.version-file}})"
         shell: bash
       - name: Check version file is valid
-        if: ${{ inputs.read-only }} == "no"
         run: |
           if ! [[ ${{ env.new-version }} =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "::error::'${{ env.new-version }}' is not a valid SemVer version format"
