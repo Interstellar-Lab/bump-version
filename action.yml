@@ -9,6 +9,10 @@ inputs:
     description: 'If "yes", will only check if version in version-file is valid; if "no" will also push a new tag (default: "no")'
     required: false
     default: 'no'
+  read-only:
+    description: 'If "yes", will only read the version-file without any other check (default: "no")'
+    required: false
+    default: 'no'
 outputs:
   last-version:
     description: 'Last version tag published'
@@ -30,6 +34,13 @@ runs:
             exit 1
           fi
         shell: bash
+      - name: Check input
+        run: |
+          if [[ (${{ inputs.read-only }} != "yes") && (${{ inputs.read-only }} != "no") ]]; then
+            echo "::error::'${{ inputs.read-only }}' is not a valid input (should be 'yes' or 'no')"
+            exit 1
+          fi
+        shell: bash
       - name: Get last version
         id: step1
         run: |
@@ -44,6 +55,9 @@ runs:
           echo "new-version=$(cat ${{inputs.version-file}})" >> $GITHUB_OUTPUT
           echo "::notice::new-version=$(cat ${{inputs.version-file}})"
         shell: bash
+      - name: End for read-only
+        if: ${{ inputs.read-only }} == "yes"
+        run: exit 0
       - name: Check version file is valid
         run: |
           if ! [[ ${{ env.new-version }} =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
