@@ -46,7 +46,9 @@ runs:
         run: |
           echo "last-version=$(git describe --abbrev=0 --match "v*" | cut -d 'v' -f2)" >> $GITHUB_ENV
           echo "last-version=$(git describe --abbrev=0 --match "v*" | cut -d 'v' -f2)" >> $GITHUB_OUTPUT
+          echo "last-version-suffix=$(git describe --abbrev=0 --match "v*" | awk -F'-' '{print $2}')" >> $GITHUB_ENV
           echo "::notice::last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)"
+          echo "::notice::last-version-suffix=$(git describe --abbrev=0 | awk -F'-' '{print $2}')"
         shell: bash
       - name: Get new version
         id: step2

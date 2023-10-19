@@ -18,6 +18,23 @@ return successfully
 - `new-version`: version contained in the version file
 - `last-version`: last version found in the git tag from the repository
 
+# Prefix
+The version tag in git will be created with "v" prefix:
+- if the version file contains "1.2.3" ; the tag added in git will be "v1.2.3"  
+
+No prefix allowed in the version file:
+- if the version file contains "v1.2.3" it will return an error as it is not a SemVer
+
+# Suffix
+Suffix delimiter is the dash `-`.  
+A suffix can be added by using the input `suffix`:
+- if the version file contains "1.2.3" and the `suffix` input is "pre-release", the tag added in git will be "v1.2.3-pre-release"  
+
+No suffix is allowed in the version file:
+- if the version file contains "1.2.3-pre-release" it will return an error as it is not a SemVer
+
+If the last version found in git tags has a suffix and the new version in the version
+
 ## Development workflow
 - You do some work
 - When ready to do a PR, you edit the version file in your repository (typically `.VERSION`) according to
