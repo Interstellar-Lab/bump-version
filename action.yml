@@ -58,7 +58,7 @@ runs:
         shell: bash
       - name: Adding dash (-) to suffix if not null
         run: |
-          if [[ -n ${{ inputs.suffix }} ]]; then
+          if [[ -n "${{ inputs.suffix }}" ]]; then
             echo "new-suffix=-${{ inputs.suffix }}" >> $GITHUB_ENV
           else
             echo "new-suffix=" >> $GITHUB_ENV
