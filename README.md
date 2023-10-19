@@ -11,8 +11,9 @@ setting the input parameter `check-only` to `yes`
 - `version-file`: path to the version file. Default is `.VERSION`
 - `check-only`: if `yes` no new tag will be published. The action will only validate that 
 the version is a valid SemVer format and it's a higher version than the last version published in a tag.
-- `read-only`: if `yes` the action will simply read the version-file and
-return successfully
+- `read-only`: if `yes` the action will simply read the versions in version file and git tag
+return successfully; version file value can be accessed from the `new-version` output and 
+the last version in git tag can be accessed with the `last-version` output.
 
 ## Outputs
 - `new-version`: version contained in the version file
@@ -28,12 +29,18 @@ No prefix allowed in the version file:
 # Suffix
 Suffix delimiter is the dash `-`.  
 A suffix can be added by using the input `suffix`:
-- if the version file contains "1.2.3" and the `suffix` input is "pre-release", the tag added in git will be "v1.2.3-pre-release"  
+- if the version file contains "1.2.3" and the `suffix` input is "pre-release", 
+the tag added in git will be "v1.2.3-pre-release"  
 
 No suffix is allowed in the version file:
 - if the version file contains "1.2.3-pre-release" it will return an error as it is not a SemVer
 
-If the last version found in git tags has a suffix and the new version in the version
+Note that a version with a suffix is not newer than the same version without suffix. Bump-version compare version without suffix:
+- if version file contains "1.2.3" and last version found in git tags is "1.2.3-pre-release" bump-version will return an error saying that version is not new
+
+If you want to release a version currently in pre-release:
+- Set the input `release` to `yes`
+- bump-version will check that the last version found in git tags has a "pre-release" suffix and publish a new tag without the suffix
 
 ## Development workflow
 - You do some work
