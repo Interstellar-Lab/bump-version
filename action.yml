@@ -70,15 +70,15 @@ runs:
           echo "last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)" >> $GITHUB_ENV
           echo "last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)" >> $GITHUB_OUTPUT
           echo "last-version-suffix=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $2}')" >> $GITHUB_ENV
-          echo "last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)"
-          echo "last-version-suffix=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $2}')"
+          echo "::notice::last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)"
+          echo "::notice::last-version-suffix=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $2}')"
         shell: bash
       - name: Get new version
         id: step2
         run: |
           echo "new-version=$(cat ${{inputs.version-file}})" >> $GITHUB_ENV
           echo "new-version=$(cat ${{inputs.version-file}})" >> $GITHUB_OUTPUT
-          echo "new-version=$(cat ${{inputs.version-file}})"
+          echo "::notice::new-version=$(cat ${{inputs.version-file}})"
         shell: bash
       - name: Check version file is valid
         run: |
@@ -139,5 +139,5 @@ runs:
           git tag -a v${{ env.new-version }}${{ env.new-suffix }} -m "Realse version ${{ env.new-version }}${{ env.new-suffix }}"
           git push origin v${{ env.new-version }}${{ env.new-suffix }}
           echo "::notice:: new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
-          echo "new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
+          echo "::notice::new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
         shell: bash
