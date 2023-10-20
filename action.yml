@@ -59,18 +59,7 @@ runs:
       - name: Check only one input set to yes
         run: |
           count=0
-          if [[ (${{ inputs.check-only }} == "yes") ]]; then
-            ((count++))
-          fi
-          if [[ (${{ inputs.read-only }} == "yes") ]]; then
-            ((count++))
-          fi
-          if [[ (${{ inputs.release-only }} == "yes") ]]; then
-            ((count++))
-          fi
-          echo "coucou"
-          echo "$count"
-          if [ $count -gt 1 ]; then
+          if [[ (${{ inputs.check-only }} == "yes") && (${{ inputs.read-only }} == "yes") || (${{ inputs.check-only }} == "yes") && (${{ inputs.release-only }} == "yes") || (${{ inputs.read-only }} == "yes") && (${{ inputs.release-only }} == "yes") ]]; then
             echo "::error::only one input can be set to 'yes'"
             exit 1
           fi
