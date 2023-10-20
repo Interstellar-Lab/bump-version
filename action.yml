@@ -68,6 +68,8 @@ runs:
           if [[ (${{ inputs.release-only }} == "yes") ]]; then
             ((count++))
           fi
+          echo "coucou"
+          echo "$count"
           if [ $count -gt 1 ]; then
             echo "::error::only one input can be set to 'yes'"
             exit 1
