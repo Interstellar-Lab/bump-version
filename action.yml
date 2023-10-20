@@ -58,6 +58,7 @@ runs:
         shell: bash
       - name: Check only one input set to yes
         run: |
+          echo "in there"
           count=0
           if [[ (${{ inputs.check-only }} == "yes") ]]; then
             ((count++))
