@@ -29,7 +29,8 @@ the version is a valid SemVer format and it's a higher version than the last ver
 
 ## Outputs
 - `new-version`: version contained in the version file
-- `last-version`: last version found in the git tag from the repository
+- `last-version`: last version found in the git tag from the repository in the SemVer format without prefix nor suffix
+  - if the last version tag is "v1.2.3-pre-release" the value of `last-version` will be "1.2.3"
 
 # Prefix
 The version tag in git will be created with "v" prefix:
