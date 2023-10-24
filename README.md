@@ -16,11 +16,12 @@ the version is a valid SemVer format and it's a higher version than the last ver
 - `read-only`: if `yes`, the action will simply read the version numbers and return the values in the outputs:
   - version file value can be accessed with the `new-version` output
   - last version in git tag can be accessed with the `last-version` output.
-- `release-only`: if `yes`, the action will try to release the last version: 
-  - It will look for the last publish version in git tags
-  - Check if the last published version has a "pre-release" suffix; it returns an error if not
-  - Check if the version in the version file match the last published version in git tag; it returns an error if not
-  - Publish a new version tag that matches the last version but without "pre-release" suffix
+- `release-only`: if `yes`, the action will try to release the version contained in the version file: 
+  - It will search in existing tags for a version matching the one in the version file with the suffix "pre-release"
+  - If none is found, it returns an error saying that this version does not exist in pre-release
+  - If found, it will publish a tag with the version contained the version file
+  - Ex: if the version in the version file is "1.2.3" 
+-> it looks for a tag "v1.2.3-pre-release" and if found it will publish a new tag "v1.2.3"
 - `suffix`: a string that will be appended to the version number in git tag:
   - if version in version file is "1.2.3" and suffix is "my_suffix"; the git tag will be "v1.2.3-my_suffix" 
   - use "pre-release" suffix to mark a version as pre-release that can later be released with the `release-only` option

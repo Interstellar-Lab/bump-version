@@ -55,6 +55,10 @@ runs:
             echo "::error::'${{ inputs.release-only }}' is not a valid input (should be 'yes' or 'no')"
             exit 1
           fi
+          if [[ (${{ inputs.release-only }} == "yes") && ("${{ inputs.suffix }}" != "") ]]; then
+            echo "::error::'suffix' is not allowed with 'release-only' option"
+            exit 1
+          fi
         shell: bash
       - name: Check only one input set to yes
         run: |
@@ -123,16 +127,9 @@ runs:
       - name: check version to release
         if: ${{ inputs.release-only == 'yes'}}
         run: |
-          if [[ ${{ env.last-version-suffix }} != "pre-release" ]]; then
-            echo "last version is not in pre-release: v${{ env.last-version }}"
-            echo "::error::no version to release"
-            exit 1
-          fi
-          if [[ ${{ env.new-version }} != ${{ env.last-version }} ]]; then
-            echo "version in the version file does not match the version to release"
-            echo "version to release is:    v${{ env.last-version }}"
-            echo "version in file is:       v${{ env.new-version }}"
-            echo "::error::version file does not match version to release"
+          if ! git rev-parse --verify --quiet v${{ env.new-version }}-pre-release >/dev/null; then
+            echo "the version in the version file is not available in pre-release"
+            echo "::error::version not in pre-release"
             exit 1
           fi
         shell: bash
