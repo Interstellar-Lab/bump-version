@@ -55,7 +55,7 @@ runs:
             echo "::error::'${{ inputs.release-only }}' is not a valid input (should be 'yes' or 'no')"
             exit 1
           fi
-          if [[ ${{ inputs.realse-only }} == "yes" && "${{ inputs.suffix }}" != "" ]]; then
+          if [[ (${{ inputs.realse-only }} == "yes") && (${{ inputs.suffix }} != "") ]]; then
             echo "::error::'suffix' is not allowed with 'release-only' option"
             exit 1
           fi
