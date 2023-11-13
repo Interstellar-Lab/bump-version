@@ -13,6 +13,14 @@ inputs:
     description: 'If "yes", will only read the version-file without any other check (default: "no")'
     required: false
     default: 'no'
+  release-only:
+    description: 'If "yes", will try to release last tag with pre-release suffix (default: "no")'
+    required: false
+    default: 'no'
+  suffix:
+    description: 'suffix that will be append after the version number and a dash. For example if suffix is "pre-release" and version in file is 1.2.3; the tag in git will be v1.2.3-pre-release'
+    required: false
+    default: ''
 outputs:
   last-version:
     description: 'Last version tag published'
@@ -27,26 +35,55 @@ runs:
         uses: actions/checkout@v2
         with:
           fetch-depth: '0'
-      - name: Check input
+      - name: Check input check-only
         run: |
           if [[ (${{ inputs.check-only }} != "yes") && (${{ inputs.check-only }} != "no") ]]; then
             echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
             exit 1
           fi
         shell: bash
-      - name: Check input
+      - name: Check input read-only
         run: |
           if [[ (${{ inputs.read-only }} != "yes") && (${{ inputs.read-only }} != "no") ]]; then
             echo "::error::'${{ inputs.read-only }}' is not a valid input (should be 'yes' or 'no')"
             exit 1
           fi
         shell: bash
+      - name: Check input release-only
+        run: |
+          if [[ (${{ inputs.release-only }} != "yes") && (${{ inputs.release-only }} != "no") ]]; then
+            echo "::error::'${{ inputs.release-only }}' is not a valid input (should be 'yes' or 'no')"
+            exit 1
+          fi
+          if [[ (${{ inputs.release-only }} == "yes") && ("${{ inputs.suffix }}" != "") ]]; then
+            echo "::error::'suffix' is not allowed with 'release-only' option"
+            exit 1
+          fi
+        shell: bash
+      - name: Check only one input set to yes
+        run: |
+          count=0
+          if [[ (${{ inputs.check-only }} == "yes") && (${{ inputs.read-only }} == "yes") || (${{ inputs.check-only }} == "yes") && (${{ inputs.release-only }} == "yes") || (${{ inputs.read-only }} == "yes") && (${{ inputs.release-only }} == "yes") ]]; then
+            echo "::error::only one input can be set to 'yes'"
+            exit 1
+          fi
+        shell: bash
+      - name: Adding dash to suffix
+        run: |
+          if [[ -n "${{ inputs.suffix }}" ]]; then
+            echo "new-suffix=-${{ inputs.suffix }}" >> $GITHUB_ENV
+          else
+            echo "new-suffix=" >> $GITHUB_ENV
+          fi
+        shell: bash
       - name: Get last version
         id: step1
         run: |
-          echo "last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)" >> $GITHUB_ENV
-          echo "last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)" >> $GITHUB_OUTPUT
-          echo "::notice::last-version=$(git describe --abbrev=0 | cut -d 'v' -f2)"
+          echo "last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)" >> $GITHUB_ENV
+          echo "last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)" >> $GITHUB_OUTPUT
+          echo "last-version-suffix=$(git describe --abbrev=0 --match 'v*' | awk -F'-' 'NF>1 {print substr($0, index($0, $2))}')" >> $GITHUB_ENV
+          echo "::notice::last-version=$(git describe --abbrev=0 --match 'v*' | awk -F'-' '{print $1}' | cut -d 'v' -f2)"
+          echo "::notice::last-version-suffix=$(git describe --abbrev=0 --match 'v*' | awk -F'-' 'NF>1 {print substr($0, index($0, $2))}')"
         shell: bash
       - name: Get new version
         id: step2
@@ -63,7 +100,7 @@ runs:
           fi
         shell: bash
       - name: Error if version is not new
-        if: ${{ inputs.read-only == 'no' }}
+        if: ${{ inputs.read-only == 'no' && inputs.release-only == 'no'}}
         run: |
           MAJOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f1)
           MINOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f2)
@@ -87,19 +124,25 @@ runs:
             exit 1
           fi
         shell: bash
+      - name: check version to release
+        if: ${{ inputs.release-only == 'yes'}}
+        run: |
+          if ! git rev-parse --verify --quiet v${{ env.new-version }}-pre-release >/dev/null; then
+            echo "the version in the version file is not available in pre-release"
+            echo "::error::version not in pre-release"
+            exit 1
+          fi
+        shell: bash
       - name: Tag new version
         if: ${{ inputs.check-only == 'no' && inputs.read-only == 'no' }}
         run: |
-          if ! [[ ${{ inputs.check-only }} != "yes" ]]; then
-            echo "::error::'${{ inputs.check-only }}' is not a valid input (should be 'yes' or 'no')"
-            exit 1
-          fi
           echo "latest version is: v${{ env.last-version }}"
-          echo "new version is:    v${{ env.new-version }}"
+          echo "new version is:    v${{ env.new-version }}${{ env.new-suffix }}"
           echo "publishing new tag..."
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git tag -a v${{ env.new-version }} -m "Realse version ${{ env.new-version }}"
-          git push origin v${{ env.new-version }}
-          echo "::notice:: new tag published: 'v${{ env.new-version }}'"
+          git tag -a v${{ env.new-version }}${{ env.new-suffix }} -m "Realse version ${{ env.new-version }}${{ env.new-suffix }}"
+          git push origin v${{ env.new-version }}${{ env.new-suffix }}
+          echo "::notice:: new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
+          echo "::notice::new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
         shell: bash
