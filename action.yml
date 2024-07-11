@@ -100,7 +100,7 @@ runs:
           fi
         shell: bash
       - name: Error if version is not new
-        if: ${{ inputs.read-only == 'no' && inputs.release-only == 'no'}}
+        if: ${{ inputs.read-only == 'no' && inputs.release-only == 'no'}} # 'check-only' mode
         run: |
           MAJOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f1)
           MINOR_LAST=$(echo ${{ env.last-version }} | cut -d '.' -f2)
@@ -125,7 +125,7 @@ runs:
           fi
         shell: bash
       - name: check version to release
-        if: ${{ inputs.release-only == 'yes'}}
+        if: ${{ inputs.release-only == 'yes'}} # 'release-only' mode
         run: |
           if ! git rev-parse --verify --quiet v${{ env.new-version }}-pre-release >/dev/null; then
             echo "the version in the version file is not available in pre-release"
@@ -134,14 +134,14 @@ runs:
           fi
         shell: bash
       - name: Tag new version
-        if: ${{ inputs.check-only == 'no' && inputs.read-only == 'no' }}
+        if: ${{ inputs.check-only == 'no' && inputs.read-only == 'no' }} # 'release-only' mode
         run: |
           echo "latest version is: v${{ env.last-version }}"
           echo "new version is:    v${{ env.new-version }}${{ env.new-suffix }}"
           echo "publishing new tag..."
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git tag -a v${{ env.new-version }}${{ env.new-suffix }} -m "Realse version ${{ env.new-version }}${{ env.new-suffix }}"
+          git tag -a v${{ env.new-version }}${{ env.new-suffix }} -m "Release version ${{ env.new-version }}${{ env.new-suffix }}"
           git push origin v${{ env.new-version }}${{ env.new-suffix }}
           echo "::notice:: new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
           echo "::notice::new tag published: 'v${{ env.new-version }}${{ env.new-suffix }}'"
